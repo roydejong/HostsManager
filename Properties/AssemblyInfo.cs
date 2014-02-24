@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("HOSTS GUI")]
-[assembly: AssemblyDescription("View and edit your Windows HOSTS file")]
+[assembly: AssemblyTitle("Hosts Manager")]
+[assembly: AssemblyDescription("Easily view and edit your Windows HOSTS file")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Software Punt")]
+[assembly: AssemblyCompany("Roy de Jong")]
 [assembly: AssemblyProduct("HostsManager")]
-[assembly: AssemblyCopyright("Copyright © Software Punt 2012")]
+[assembly: AssemblyCopyright("GNU GPL v2")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
