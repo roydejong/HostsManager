@@ -4,5 +4,6 @@
     {
         public string Address;
         public string Host;
+        public bool Enabled;
     }
 }

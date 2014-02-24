@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using System.Text;
 
 namespace HostsManager
 {
     public static class HostsFileManager
     {
-        public static List<HostsEntry> entries = new List<HostsEntry>();
+        public const string DISABLED_INDICATOR = "# disabled ";
+
+        public static List<HostsEntry> Entries = new List<HostsEntry>();
 
         public static string Filename
         {
@@ -18,64 +21,184 @@ namespace HostsManager
             }
         }
 
-        public static void Refresh(RichTextBox rtb, ListView lsv)
+        public static HostsEntry FindEntry(String hostname)
         {
-            lsv.Items.Clear();
-            rtb.Clear();
-            entries.Clear();
-            
-            var raw = File.ReadAllLines(Filename);
+            foreach (HostsEntry entry in Entries)
+            {
+                if (entry.Host == hostname)
+                {
+                    return entry;
+                }
+            }
 
-            int idx = 0;
-            int len = 0;
+            return null;
+        }
+
+        public static void DeleteEntry(String hostname)
+        {
+            foreach (HostsEntry entry in Entries)
+            {
+                if (entry.Host == hostname)
+                {
+                    Entries.Remove(entry);
+                    break;
+                }
+            }
+        }
+
+        public static string GenerateHostsText()
+        {
+            string[] lines = GenerateHostsLines();
+            StringBuilder outText = new StringBuilder();
+
+            foreach (string ln in lines)
+            {
+                outText.Append(ln);
+                outText.Append(Environment.NewLine);
+            }
+
+            return outText.ToString();
+        }
+
+        public static string[] GenerateHostsLines()
+        {
+            List<string> outLines = new List<string>();
+            List<string> seenHosts = new List<string>();
+
+            var raw = File.ReadAllLines(Filename);
 
             foreach (string line in raw)
             {
-                if (line.StartsWith("#"))
+                bool isDisabledEntry = line.StartsWith(DISABLED_INDICATOR);
+
+                if (line.StartsWith("#") && !isDisabledEntry)
                 {
-                    rtb.SelectionColor = Color.DarkGreen;
-                    rtb.AppendText(line);
+                    outLines.Add(line);
+                    continue;
                 }
-                else
+
+                string aLine = line;
+
+                if (isDisabledEntry)
                 {
-                    string[] parts = line
+                    aLine = line.Substring(DISABLED_INDICATOR.Length).Trim();
+                }
+
+                string[] parts = aLine
                         .Replace('\t', ' ')
                         .Trim()
                         .Split(' ');
 
-                    if (parts.Length == 2)
+                if (parts.Length == 2)
+                {
+                    String address = parts[0];
+                    String host = parts[1];
+
+                    if (seenHosts.Contains(host))
                     {
-                        entries.Add(new HostsEntry()
-                        {
-                            Address = parts[0],
-                            Host = parts[1]
-                        });
-
-                        rtb.SelectionColor = Color.Blue;
-                        rtb.AppendText(parts[0]);
-                        rtb.AppendText(" ");
-                        rtb.SelectionColor = Color.Purple;
-                        rtb.AppendText(parts[1]);
-
-                        var lvi = new ListViewItem()
-                        {
-                            Text = "Yes"
-                        };
-
-                        lvi.SubItems.Add(parts[0]);
-                        lvi.SubItems.Add(parts[1]);
-
-                        lsv.Items.Add(lvi);
+                        continue;
                     }
+
+                    seenHosts.Add(host);
+
+                    HostsEntry customEntry = FindEntry(host);
+
+                    // If we do not have a mutation for this line it has been deleted in the editor (or added after saving)
+                    if (customEntry == null)
+                    {
+                        continue;
+                    }
+                    // If we DO have an entry, it might have been mutated by the editor, so provide an alternate version of this line
                     else
                     {
-                        rtb.SelectionColor = Color.Red;
-                        rtb.AppendText(line);
+                        StringBuilder customLine = new StringBuilder();
+
+                        if (!customEntry.Enabled)
+                        {
+                            customLine.Append(DISABLED_INDICATOR);
+                        }
+
+                        customLine.Append(customEntry.Address);
+                        customLine.Append(" ");
+                        customLine.Append(customEntry.Host);
+
+                        outLines.Add(customLine.ToString());
                     }
                 }
-
-                rtb.AppendText("\r\n");
+                else
+                {
+                    outLines.Add(line);
+                }
             }
+
+            foreach (HostsEntry customEntry in Entries)
+            {
+                if (seenHosts.Contains(customEntry.Host))
+                {
+                    continue;
+                }
+
+                StringBuilder customLine = new StringBuilder();
+
+                if (!customEntry.Enabled)
+                {
+                    customLine.Append(DISABLED_INDICATOR);
+                }
+
+                customLine.Append(customEntry.Address);
+                customLine.Append(" ");
+                customLine.Append(customEntry.Host);
+
+                outLines.Add(customLine.ToString());
+            }
+
+            return outLines.ToArray();
+        }
+
+        public static void RefreshData()
+        {
+            Entries.Clear();
+
+            var raw = File.ReadAllLines(Filename);
+
+            foreach (string line in raw)
+            {
+                bool isDisabledEntry = line.StartsWith(DISABLED_INDICATOR);
+
+                if (line.StartsWith("#") && !isDisabledEntry)
+                {
+                    continue;
+                }
+
+                string aLine = line;
+
+                if (isDisabledEntry)
+                {
+                    aLine = line.Substring(DISABLED_INDICATOR.Length).Trim();
+                }
+
+                string[] parts = aLine
+                        .Replace('\t', ' ')
+                        .Trim()
+                        .Split(' ');
+
+                if (parts.Length != 2)
+                {
+                    continue;
+                }
+
+                Entries.Add(new HostsEntry()
+                {
+                    Address = parts[0],
+                    Host = parts[1],
+                    Enabled = !isDisabledEntry
+                });
+            }
+        }
+
+        public static void Save()
+        {
+            File.WriteAllLines(HostsFileManager.Filename, GenerateHostsLines());
         }
     }
 }

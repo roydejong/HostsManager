@@ -23,22 +23,35 @@ namespace HostsManager
             label2.ForeColor = Color.Black;
             label2.Text = "Resolving " + hostname + "...";
 
-            Dns.BeginGetHostEntry(hostname, onResolveResult, null);
+            Dns.BeginGetHostEntry(hostname, onResolveResult, hostname);
         }
 
         private void onResolveResult(IAsyncResult result)
         {
-            IPHostEntry dnsEntry = Dns.EndGetHostEntry(result);
+            IPHostEntry dnsEntry = null;
+
+            try
+            {
+                dnsEntry = Dns.EndGetHostEntry(result);
+            }
+            catch (Exception e) { }
+
+            string inHostname = (String)result.AsyncState;
 
             this.BeginInvoke(new Action(() =>
             {
-                if (dnsEntry.AddressList.Length == 0)
+                if (dnsEntry == null || dnsEntry.AddressList.Length == 0)
                 {
-                    label2.Text = "Could not resolve " + dnsEntry.HostName;
+                    label2.Text = "Could not resolve " + inHostname;
                 }
                 else
                 {
-                    label2.Text = dnsEntry.HostName + " resolves to " + dnsEntry.AddressList[0];
+                    if (dnsEntry.HostName != inHostname)
+                    {
+                        inHostname = inHostname + " (" + dnsEntry.HostName + ")";
+                    }
+
+                    label2.Text = inHostname + " resolves to " + dnsEntry.AddressList[0];
                 }
             }));
         }
