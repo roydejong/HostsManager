@@ -4,4 +4,4 @@ HostsManager is a user-friendly UI for managing entries in the HOSTS file writte
 
 I am releasing this in the hopes that it will be useful to others and to hopefully see it improved further.
 
-![HostsManager](http://i.imgur.com/47mUXGO.png)
+![HostsManager](http://i.imgur.com/SY5sJIe.png)
