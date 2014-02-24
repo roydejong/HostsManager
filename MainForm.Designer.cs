@@ -246,17 +246,17 @@
             // columnHeader1
             // 
             this.columnHeader1.Text = "Enabled?";
-            this.columnHeader1.Width = 141;
+            this.columnHeader1.Width = 62;
             // 
             // columnHeader2
             // 
             this.columnHeader2.Text = "Hostname";
-            this.columnHeader2.Width = 254;
+            this.columnHeader2.Width = 257;
             // 
             // columnHeader3
             // 
-            this.columnHeader3.Text = "Resolution";
-            this.columnHeader3.Width = 417;
+            this.columnHeader3.Text = "Resolve to (IP)";
+            this.columnHeader3.Width = 175;
             // 
             // contextMenuStrip1
             // 
@@ -267,7 +267,7 @@
             this.toggleEnabledToolStripMenuItem,
             this.deleteToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(157, 120);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(157, 98);
             // 
             // addNewToolStripMenuItem
             // 

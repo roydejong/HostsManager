@@ -63,8 +63,8 @@ namespace HostsManager
                             Text = isDisabledEntry ? "No" : "Yes"
                         };
 
-                        lvi.SubItems.Add(parts[0]);
-                        lvi.SubItems.Add(parts[1]);
+                        lvi.SubItems.Add(Host);
+                        lvi.SubItems.Add(Address);
                         lvi.Tag = Host;
 
                         lsv.Items.Add(lvi);
