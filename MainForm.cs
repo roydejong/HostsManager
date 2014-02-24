@@ -13,6 +13,8 @@ namespace HostsManager
 {
     public partial class MainForm : Form
     {
+        private ResolutionTester tester;
+
         public MainForm()
         {
             InitializeComponent();
@@ -41,7 +43,23 @@ namespace HostsManager
 
         private void toolStripButton3_Click(object sender, EventArgs e)
         {
+            if (this.tester == null || this.tester.IsDisposed)
+            {
+                this.tester = new ResolutionTester();
+                this.tester.FormClosed += new FormClosedEventHandler(tester_FormClosed);
+                tester.Show();
+            }
+            else
+            {
+                tester.WindowState = FormWindowState.Normal;
+                tester.Activate();
+            }
+        }
 
+        private void tester_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            this.tester.Dispose();
+            this.tester = null;
         }
     }
 }
